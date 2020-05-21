@@ -3,25 +3,30 @@
     <div>
         <div class="row">
         <div class="col-md-6 col-lg-6 col-sm-12">
+
+        <span v-if="error != ''" class="text text-danger" >{{ error }}</span>
+        <span v-if="success != ''" class="text text-success" >{{ success }}</span>
         
-        <div class="form-group">
-            <label>Name</label>
-            <input type="text" class="form-control" v-model="name" />
-        </div>
+        <!-- Default form login -->
+        <form class="text-center border border-light p-5" action="#!">
 
-        <div class="form-group">
-            <label>Email</label>
-            <input type="text" class="form-control" v-model="email" />
-        </div>
+            <p class="h4 mb-4">Sign up</p>
 
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" class="form-control" v-model="password" />
-        </div>
+            <input type="text" v-model="name" id="defaultLoginFormEmail" class="form-control mb-4" placeholder="Name">
 
-        <div class="form-group">
-            <button class="btn btn-primary" v-on:click="register">Register</button>
-        </div>
+            <!-- Email -->
+            <input type="email" v-model="email" id="defaultLoginFormEmail" class="form-control mb-4" placeholder="E-mail">
+
+            <!-- Password -->
+            <input type="password" v-model="password" id="defaultLoginFormPassword" class="form-control mb-4" placeholder="Password">
+
+            
+
+            <!-- Sign in button -->
+            <button :disabled="networkRequest" class="btn btn-info btn-block my-4" type="button" v-on:click="register" v-html="networkRequest ? 'Processing..': 'Sign up'"></button>
+
+        </form>
+        <!-- Default form login -->
 
         </div>
         </div>
@@ -32,7 +37,8 @@
 
 <script>
 
-import apiConfig from '../../config/api'
+import apiConfig from '../../config/api.json'
+import axios from 'axios'
 
 export default {
   name: 'Register',
@@ -40,12 +46,43 @@ export default {
       return{
           name:'',
           email:'',
-          password:''
+          password:'',
+          error:'',
+          success:'',
+          networkRequest: false
       }
   },
   methods: {
+      
       register: function() {
-          console.log(this.name)
+          let user = {
+              name: this.name,
+              email: this.email,
+              password: this.password
+          }
+          this.networkRequest = true
+          axios.post(apiConfig.apiURL + 'register',user)
+          .then( response => {
+              this.networkRequest = false
+              if(response.data.status == true){
+                  this.success = response.data.message
+                  this.newUser('','','')
+                  
+              }else{
+                  this.error = response.error;
+              }
+                  
+          })
+          .catch( error => {
+              this.networkRequest = false
+              this.error = error.message
+          })
+      },
+
+      newUser: function(name,email,password) {
+          this.name = name
+          this.email = email
+          this.password = password
       }
   }
 }
