@@ -2,23 +2,26 @@
 
     <div>
         <div class="row">
-        <div class="col-md-6 col-lg-6 col-sm-12">
+        <div class="col-md-6 col-lg-6 col-sm-12 col-md-offset-5">
 
         <span v-if="error != ''" class="text text-danger" >{{ error }}</span>
         <span v-if="success != ''" class="text text-success" >{{ success }}</span>
         
         <!-- Default form login -->
-        <form class="text-center border border-light p-5" action="#!">
+        <form class="border border-light p-5" action="#!">
 
             <p class="h4 mb-4">Sign up</p>
 
             <input type="text" v-model="name" id="defaultLoginFormEmail" class="form-control mb-4" placeholder="Name">
+            <span v-if="error.name != ''" class="text text-danger">{{ errors.name }}</span>
 
             <!-- Email -->
             <input type="email" v-model="email" id="defaultLoginFormEmail" class="form-control mb-4" placeholder="E-mail">
+            <span v-if="error.email != ''" class="text text-danger">{{ errors.email }}</span>
 
-            <!-- Password -->
+            <!-- Passwor`d -->
             <input type="password" v-model="password" id="defaultLoginFormPassword" class="form-control mb-4" placeholder="Password">
+            <span v-if="error.password != ''" class="text text-danger">{{ errors.password }}</span>
 
             
 
@@ -49,7 +52,12 @@ export default {
           password:'',
           error:'',
           success:'',
-          networkRequest: false
+          networkRequest: false,
+          errors: {
+            name: '',
+            email: '',
+            password: ''
+          }
       }
   },
   methods: {
@@ -67,15 +75,19 @@ export default {
               if(response.data.status == true){
                   this.success = response.data.message
                   this.newUser('','','')
+                  this.error = ''
                   
               }else{
-                  this.error = response.error;
+                  this.error = response.data.message;
               }
                   
           })
           .catch( error => {
               this.networkRequest = false
-              this.error = error.message
+              this.error = error.response.data.message
+              for(var k in error.response.data.errors)
+                this.errors[k] = error.response.data.errors[k][0]
+             
           })
       },
 

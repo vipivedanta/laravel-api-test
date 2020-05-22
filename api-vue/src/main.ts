@@ -6,6 +6,9 @@ import store from './store'
 
 import 'bootstrap/dist/css/bootstrap.css'
 
+var VueCookie = require('vue-cookie');
+Vue.use(VueCookie);
+
 Vue.config.productionTip = false
 
 new Vue({

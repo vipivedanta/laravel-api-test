@@ -7,13 +7,18 @@ use Exception;
 use App\Traits\Response;
 use App\User;
 use Hash;
+use Auth;
+use Str;
+
+use App\Http\Requests\Users\RegisterRequest;
+use App\Http\Requests\Users\LoginRequest;
 
 class UserController extends Controller
 {	
 
 	use Response;
     
-    public function register(Request $request) 
+    public function register(RegisterRequest $request) 
     {
     	try {
 
@@ -31,5 +36,46 @@ class UserController extends Controller
     	}catch(Exception $e) {
     		return $this->errorResponse($e);
     	}
+    }
+
+    public function login(LoginRequest $request) {
+
+    	try{
+
+    		$user = Auth::attempt([
+    			'email' => $request->email,
+    			'password' => $request->password
+    		]);
+
+    		if(!$user) throw new Exception("Invalid username or password", 1);
+
+            $user = $this->refreshApiToken();
+
+            return $this->successResponse('Successfully loggedin',$user);            
+
+    	}catch(Exception $e) {
+    		return $this->errorResponse($e);
+    	}
+    }
+
+    public function logout(Request $request) {
+
+        try{
+
+            $this->refreshApiToken();
+            return $this->successResponse('Successfully logged out',[]);
+
+        }catch(Exception $e) {
+            return $this->errorResponse($e);
+        }
+    }
+
+    public function refreshApiToken() 
+    {
+        $user = Auth::user();
+        $user->api_token = Str::uuid(4,'');
+        $user->save();     
+
+        return $user;   
     }
 }

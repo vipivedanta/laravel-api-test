@@ -17,4 +17,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('register','UserController@register');
+// Route::group(['middleware' => 'cors'],function(){
+	Route::post('register','UserController@register');
+	Route::post('login','UserController@login');
+// });
+
+Route::middleware('auth:api')->post('upload-file','FileController@receiveFile');
+Route::middleware('auth:api')->get('list-products','FileController@listProducts');
+Route::middleware('auth:api')->post('logout','UserController@logout');
